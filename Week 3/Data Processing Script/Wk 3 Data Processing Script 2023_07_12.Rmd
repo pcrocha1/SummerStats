@@ -1,0 +1,127 @@
+---
+output:
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#Packages
+library(stringr)
+library(knitr)
+library(tinytex)
+```
+
+```{r Load}
+#This code is meant to log the raw data
+#Meaning it will say look at Week 3, then look at Raw Data, and then look at this csv data
+
+rawDATA <- read.csv("Week 3/Raw Data/Week 3 Example Data.csv")
+
+#This is making a copy of the data. So if we mess up we can still have the original source
+copyData <- rawDATA
+```
+
+
+After the data has been load, the next thing to do is rename the column names to things that make sense
+
+Renaming should be the FIRST step
+```{r Structure_Renaming}
+#in the colmuns in copy data, find me columns 6 through 15. 
+#paste0 function. Will automate things, by giving a list of things and pasting them together
+
+colnames(copyData)[6:15] <- paste0("tipi",
+                                   rep(c("E","A","C","A","O"),2), 1:10)
+#wWhat was done was that we have made questions 1-16, be given a E/A/C/A/O
+#Problem is that some questions are not reverse coded
+#get me the columns of ll, 13,15. Now we need to add r to the end
+
+colnames(copyData)[c(7,11,13:15)]<- paste0(colnames(copyData)[c(7,11,13:15)], "R")
+```
+
+To tidy we will need package stringr. 
+```{r Restructure_Variables}
+#str_split_fixed function will split function into pieces
+
+condition2Col<- str_split_fixed(copyData$condition,"_",2)
+#Hey R i want you too split variables. I specifically want you to go to copyData and go to the coniditon column. Every time you see a _, split it into 2 groups
+
+#Rename the newly created condition variables
+colnames(condition2Col) <- c("Who did it?", "pMoral")
+
+copyData <- cbind (copyData,condition2Col)
+
+
+#It says give me everything except for column 4
+copyData <- copyData[,-4]
+
+copyData$guilt <-ifelse(copyData$guilt==99, NA, copyData$guilt)
+
+```
+
+
+```{r Compute}
+#Reverse code the relevant TIPI items
+copyData[,c(6,10,12:14)] <- (-1*copyData[,c(6,10,12:14)])+8 
+
+copyData$extra <- rowMeans(copyData[,c(5,10)])
+
+copyData$agree<- rowMeans(copyData[,c(6,11)])
+
+copyData$consc <- rowMeans(copyData[,c(7,12)])
+
+copyData$neuro <- rowMeans(copyData[,c(8,13)])
+
+copyData$open <- rowMeans(copyData[,c(9,14)])
+
+
+#Lets rearragee the dataFrame
+```
+
+
+```{r Codebook}
+#In the code book we will rearrange
+newData <- copyData [,c(1:3,5:14,20:24,4,18:19,15:17)]
+
+codebook <- data.frame("variable"=colnames(newData))
+
+codebook$descroption <- c(
+  "Participant ID Number",
+  "Particiapnt Sex",
+  "Participant Age", 
+  "Tipi Extraversion 1",
+  "Tipi Agreeableness 1 (R)",
+  "Tipi Concsciencious 1", 
+  "Tipi Neurotricism 1",
+  "Tipi Openness 1",
+  "Tipi Extraversion 2 (R)",
+  "Tipi Agreeableness",
+  "Tipi Concsciencious 2 (R)", 
+  "Tipi Neurotricism 2 (R)",
+  "Tipi Openness 2 (R)",
+  "Composite Extraversion",
+  "Composite Agreeableness",
+  "Composite Concsciencious",
+  "Composite Neurotricism", 
+  "Composite Openness",
+  "Shock Voltage",
+  "Shock Cause (participant vs. partner)",
+  "Partner Morality (good vs bad)",
+  "Amount of $ shared with partner (pre-shock)",
+  "Amount of $ shared with partner (post-shock)",
+  "Guilt Reported by Participant"
+)
+
+#Saves the data type for each variable
+codebook$type <-sapply(newData,class)
+
+#Output the codebook as a table
+kable(codebook)
+```
+
+
+```{r Save}
+#to save the data
+write.csv(newData,"Week 3/Processed Data/Week 3 Data PROCESSED.csv")
+```
+
