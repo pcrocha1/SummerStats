@@ -1,8 +1,3 @@
-ReadMe
-================
-PCR
-2023-07-05
-
 # UCSN PBS Summer Stats Repsitory
 
 ## Priscilla Cuellar-Rocha
