@@ -4,7 +4,7 @@
 
 ## CSUSB
 
-## Rat Lab - Karen
+## Behavioral and Neural Genetics (BANG) LAB - Karen Szumkslki
 
 ------------------------------------------------------------------------
 
